@@ -165,11 +165,11 @@ void emit_cpp(const char* base_name, VariantArray rules)
 		"#include\t<%s.h>\n"
 		"\n"
 		"%s\n"				// capture_arrays
-		"template<>%sParser::Rule\t%sParser::rules[] =\n{"
+		"%sParser::Rule\t%sParser::rules[] =\n{"
 		"%s\n"				// rules_text
 		"};\n"
 		"\n"
-		"template<>int\t%sParser::num_rule = sizeof(%sParser::rules)/sizeof(%sParser::rules[0]);\n",
+		"int\t%sParser::num_rule = sizeof(%sParser::rules)/sizeof(%sParser::rules[0]);\n",
 
 		parser_name_u,			// Rules for a XXX
 		file_base_name_u,		// You must declare...

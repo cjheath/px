@@ -63,7 +63,7 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 			StrVal	s;
 			if (ch == '0')		// Octal
 			{
-				StrBody	temp_body(cp, false, 3);		// no-copy string body
+				StrBody	temp_body(cp, StrStatic, 3);		// no-copy string body
 				ch = StrVal(&temp_body).asInt32(&e, 8, &i);
 				if (e == 0 || e == STRERR_TRAIL_TEXT)
 					cp += i;
@@ -72,12 +72,12 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 			{
 				if (*cp != '{')
 				{
-					StrBody	temp_body(cp, false, 2);	// no-copy string body
+					StrBody	temp_body(cp, StrStatic, 2);	// no-copy string body
 					ch = StrVal(&temp_body).asInt32(&e, 16, &i);
 				}
 				else
 				{
-					StrBody	temp_body(cp+1, false, 8);	// no-copy string body
+					StrBody	temp_body(cp+1, StrStatic, 8);	// no-copy string body
 					ch = StrVal(&temp_body).asInt32(&e, 16, &i);
 				}
 				if (e == 0 || e == STRERR_TRAIL_TEXT)
@@ -87,12 +87,12 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 			{
 				if (*cp == '{')
 				{
-					StrBody	temp_body(cp+1, false, 8);	// no-copy string body
+					StrBody	temp_body(cp+1, StrStatic, 8);	// no-copy string body
 					ch = StrVal(&temp_body).asInt32(&e, 16, &i);
 				}
 				else
 				{
-					StrBody	temp_body(cp, false, 4);	// no-copy string body
+					StrBody	temp_body(cp, StrStatic, 4);	// no-copy string body
 					ch = StrVal(&temp_body).asInt32(&e, 16, &i);
 				}
 				if (e == 0 || e == STRERR_TRAIL_TEXT)
@@ -118,7 +118,7 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 				static	char	buf[16];
 
 				snprintf(buf, sizeof(buf), "\\u{%X}", ch);
-				static StrBody	temp_body(buf, false, strlen(buf));	// zero-touch string body
+				static StrBody	temp_body(buf, StrStatic, strlen(buf));	// zero-touch string body
 				return StrVal(&temp_body);
 			}
 

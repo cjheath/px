@@ -6,6 +6,13 @@
 #include	<peg.h>
 #include	<peg_ast.h>
 
-typedef	Peg<PegMemorySource, PegMatch, PegContext>	PxParser;
+class PxParser
+: public Peg<PegMemorySource, PegMatch, PegContext>
+{
+	static	Rule	rules[];
+	static	int	num_rule;
+public:
+	PxParser() : Peg(rules, num_rule) {}
+};
 
 #endif // PX_PARSER_H

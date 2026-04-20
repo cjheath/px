@@ -19,7 +19,7 @@ const char*	label_captures[] = { "name", 0 };
 const char*	atom_captures[] = { "any", "call", "property", "literal", "class", "group", 0 };
 const char*	group_captures[] = { "alternates", 0 };
 
-template<>PxParser::Rule	PxParser::rules[] =
+PxParser::Rule	PxParser::rules[] =
 {
 	{ "EOF",
 	  "!.",
@@ -123,4 +123,4 @@ template<>PxParser::Rule	PxParser::rules[] =
 	}
 };
 
-template<>int	PxParser::num_rule = sizeof(PxParser::rules)/sizeof(PxParser::rules[0]);
+int	PxParser::num_rule = sizeof(PxParser::rules)/sizeof(PxParser::rules[0]);
