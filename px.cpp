@@ -193,6 +193,7 @@ parse_and_emit(const char* filename, VariantArray& rules, Emitter emit)
 			{
 				PegFailure	f = match.failures[i];
 				printf("\t%.*s\n", f.atom_len, f.atom);
+				printf("\t... from %s\n", StringArray(f.path).join("->").asUTF8());
 			}
 			break;
 		}
