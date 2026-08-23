@@ -1,0 +1,38 @@
+{
+  "fileTypes": [
+    
+  ],
+  "name": "Json_annotated",
+  "patterns": [
+    {
+      "include": "#string"
+    },
+    {
+      "include": "#escape"
+    },
+    {
+      "include": "#number"
+    }
+  ],
+  "repository": {
+    "escape": {
+      "match": "[\\\\](?:(?:[\"\\\\\/bfnrt]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))",
+      "name": "constant.character.escape.px"
+    },
+    "number": {
+      "match": "-?(?:(?:0|[1-9][0-9]*))(?:\\.[0-9]+)?(?:[eE][-+]?[0-9]+)?",
+      "name": "constant.numeric.px"
+    },
+    "string": {
+      "begin": "(?:[ \\t\\r\\n]*)[\"]",
+      "end": "[\"](?:[ \\t\\r\\n]*)",
+      "name": "string.quoted.double.px",
+      "patterns": [
+        {
+          "include": "#escape"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.json_annotated"
+}

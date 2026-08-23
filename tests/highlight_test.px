@@ -1,0 +1,22 @@
+// Scratch grammar to exercise the textmate generator's three pattern shapes.
+
+s =
+	*[ \t\r\n]
+
+keyword (as keyword.control.px) =
+	| 'if' | 'else' | 'while'
+
+number (as constant.numeric.px) =
+	+[0-9] ?('.' +[0-9])
+
+escape (as constant.character.escape.px) =
+	'\\' ["\\ntr]
+
+string (as string.quoted.double.px) =
+	["] *(|escape |[^"\\]) ["]
+
+blockComment (as comment.block.px) =
+	'/*' *(!'*/' .) '*/'
+
+TOP =
+	*(s (|keyword |number |string |blockComment))

@@ -2,6 +2,8 @@
 # Vanilla makefile for px
 #
 
+SHELL	=	/bin/bash	# `test` target uses diff <(...) process substitution
+
 CXX	=	g++
 CXXFLAGS =	-std=c++11
 
@@ -52,9 +54,39 @@ px-rr.html: px px.px
 strpp:	
 	cd $(STRPP); make lib
 
-test:
+# Regression tests for the -t (TextMate grammar) generator. Each NAME.px has matching
+# NAME.expected.json (stdout) and NAME.expected.stderr (stderr): frozen fixtures live
+# in tests/, plus px.px itself (the live language grammar, checked against
+# tests/px.expected.*). Regenerate expectations after an intentional change with:
+#   px -t NAME.px >NAME.expected.json 2>NAME.expected.stderr
+test:	px
+	@check() { \
+		grammar=$$1; name=$$2; \
+		out=$$(./px -t "$$grammar" 2>/tmp/px_test_stderr.$$$$); \
+		err=$$(cat /tmp/px_test_stderr.$$$$); rm -f /tmp/px_test_stderr.$$$$; \
+		ok=1; \
+		if [ "$$out" != "$$(cat "$$name.expected.json")" ]; then \
+			echo "FAIL: $$name (stdout differs from $$name.expected.json)"; \
+			diff <(echo "$$out") "$$name.expected.json" | head -10; \
+			ok=0; \
+		fi; \
+		if [ "$$err" != "$$(cat "$$name.expected.stderr")" ]; then \
+			echo "FAIL: $$name (stderr differs from $$name.expected.stderr)"; \
+			diff <(echo "$$err") "$$name.expected.stderr" | head -10; \
+			ok=0; \
+		fi; \
+		[ $$ok -eq 1 ] && echo "PASS: $$name" || fail=1; \
+	}; \
+	fail=0; \
+	check px.px tests/px; \
+	for grammar in tests/*.px; do \
+		name=$${grammar%.px}; \
+		[ -f "$$name.expected.json" ] || continue; \
+		check "$$grammar" "$$name"; \
+	done; \
+	exit $$fail
 
-tests:
+tests:	test
 
 clean:
 	rm -f px $(OBJS)

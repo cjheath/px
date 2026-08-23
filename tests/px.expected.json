@@ -1,0 +1,69 @@
+{
+  "fileTypes": [
+    
+  ],
+  "name": "Px",
+  "patterns": [
+    {
+      "include": "#space"
+    },
+    {
+      "include": "#scope_annotation"
+    },
+    {
+      "include": "#scope_name"
+    },
+    {
+      "include": "#label"
+    },
+    {
+      "include": "#name"
+    },
+    {
+      "include": "#literal"
+    },
+    {
+      "include": "#property"
+    },
+    {
+      "include": "#class"
+    }
+  ],
+  "repository": {
+    "class": {
+      "begin": "\\[",
+      "end": "\\]",
+      "name": "constant.other.character-class.px"
+    },
+    "label": {
+      "match": ":(?:[A-Za-z_][\\w_]*)",
+      "name": "keyword.other.annotation.px"
+    },
+    "literal": {
+      "begin": "'",
+      "end": "'",
+      "name": "string.quoted.single.px"
+    },
+    "name": {
+      "match": "[A-Za-z_][\\w_]*",
+      "name": "entity.name.function.px"
+    },
+    "property": {
+      "match": "[adhswLU]",
+      "name": "constant.character.escape.px"
+    },
+    "scope_annotation": {
+      "match": "\\((?:(?:(?!(?:\\n[ \\t\\r]*(?:(?:\\n|(?!.)))))(?:[ \\t\\r\\n]|\\\/\\\/[^\\n]*))*)as(?:(?:(?!(?:\\n[ \\t\\r]*(?:(?:\\n|(?!.)))))(?:[ \\t\\r\\n]|\\\/\\\/[^\\n]*))*)(?:[A-Za-z_][\\w_.\\-]*)(?:(?:(?!(?:\\n[ \\t\\r]*(?:(?:\\n|(?!.)))))(?:[ \\t\\r\\n]|\\\/\\\/[^\\n]*))*)\\)(?:(?:(?!(?:\\n[ \\t\\r]*(?:(?:\\n|(?!.)))))(?:[ \\t\\r\\n]|\\\/\\\/[^\\n]*))*)",
+      "name": "keyword.other.annotation.px"
+    },
+    "scope_name": {
+      "match": "[A-Za-z_][\\w_.\\-]*",
+      "name": "entity.other.attribute-name.px"
+    },
+    "space": {
+      "match": "(?:[ \\t\\r\\n]|\\\/\\\/[^\\n]*)",
+      "name": "comment.line.double-slash.px"
+    }
+  },
+  "scopeName": "source.px"
+}
