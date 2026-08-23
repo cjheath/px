@@ -99,12 +99,34 @@ Note how in the above example, the rule _object_ will capture two correlated arr
 of keys and values respectively, _array_ will capture one array of elements, and
 _string_ will capture an array of items which encode one character each.
 
+### Syntax colouring
+
+A rule's name may be followed by a parenthesised `(as scope.name)` annotation, before
+the `=`. This assigns a [TextMate scope name](https://www.sublimetext.com/docs/scope_naming.html)
+(e.g. `keyword.control.px`, `string.quoted.double.px`) to colour whatever that rule
+matches, for the `-t` (TextMate grammar) output described below. Untagged rules are
+plain grammar as usual, and are transparently inlined wherever a tagged rule calls
+them. When a tagged rule calls another tagged rule, the callee's own colour applies to
+just its own matched span - there is no way to tag an individual atom, so this is the
+only way to get a "more specific" colour within a rule.
+
+```
+comment (as comment.line.px) =
+	'//' *[^\n]
+
+string (as string.quoted.double.px) =
+	s ["] *(|[^"\\\u{0}-\u{1F}]:c |escape:c) ["] s
+	-> c
+```
+
 ### Command line
 
 Command-line parsing for Px is rudimentary and will change. For now, the options are:
 
-`px [ -r [ -x excluded] ... ] file.px`
+`px [ -r [ -x excluded] ... | -j | -t ] file.px`
 
 -   with no options, _px_ generates a parse table in C++
 - -r    generate an HTML file with embedded Javascript calls to generate railroad diagrams
 - -x xx Exclude rule xx from the railroad diagrams (e.g. for non-significant whitespace). May be repeated
+- -j    dump the parsed grammar as JSON
+- -t    generate a TextMate grammar (JSON) for IDE syntax highlighting, from rules tagged with `(as scope.name)`

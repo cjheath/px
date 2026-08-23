@@ -6,7 +6,8 @@
 #include	<px_parser.h>
 
 const char*	TOP_captures[] = { "rule", 0 };
-const char*	rule_captures[] = { "name", "alternates", "action", 0 };
+const char*	rule_captures[] = { "name", "scope_annotation", "alternates", "action", 0 };
+const char*	scope_annotation_captures[] = { "scope_name", 0 };
 const char*	action_captures[] = { "function", "parameter", 0 };
 const char*	parameter_captures[] = { "parameter", 0 };
 const char*	reference_captures[] = { "name", "joiner", 0 };
@@ -46,8 +47,16 @@ PxParser::Rule	PxParser::rules[] =
 	  0
 	},
 	{ "rule",
-	  "<name><s>=<s><alternates>?<action><blankline><s>",
+	  "<name><s>?<scope_annotation>=<s><alternates>?<action><blankline><s>",
 	  rule_captures
+	},
+	{ "scope_annotation",
+	  "\\(<s>as<s><scope_name><s>\\)<s>",
+	  scope_annotation_captures
+	},
+	{ "scope_name",
+	  "[\\a_]*[\\w_.\\-]",
+	  0
 	},
 	{ "action",
 	  "-><s>?(<name>:function:\\:<s>)<parameter>*(,<s><parameter>)<s>",

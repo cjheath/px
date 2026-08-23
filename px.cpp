@@ -17,6 +17,7 @@
 #include	<px_pegexp.h>
 #include	<px_cpp.h>
 #include	<px_railroad.h>
+#include	<px_textmate.h>
 #include	<px_parser.cpp>
 
 typedef	CowMap<bool>	StringSet;
@@ -260,6 +261,11 @@ main(int argc, const char** argv)
 		{
 			argc--, argv++;
 			emit = emit_json;
+		}
+		else if (0 == strcmp("-t", argv[0]))
+		{
+			argc--, argv++;
+			emit = emit_textmate;
 		}
 	}
 

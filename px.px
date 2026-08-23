@@ -5,7 +5,7 @@ EOF =					// End of file is where nothing follows
 	!.
 
 // space may include an end-of-line, or a //comment to eol
-space =
+space (as comment.line.double-slash.px) =
 	| [ \t\r\n]			// Any single whitespace
 	| '//' *[^\n]			// including a comment to end-of-line
 
@@ -26,10 +26,17 @@ BOM	=
 	  '\uFEFF'
 
 rule =
-	name s '=' s			// A named rule matches...
+	name s ?scope_annotation '=' s	// A named rule matches...
 	alternates ?action		// alternates perhaps followed by an action
 	blankline s			// and ends in a blank line
-	-> name, alternates, action
+	-> name, scope_annotation, alternates, action
+
+scope_annotation (as keyword.other.annotation.px) =	// Assigns a TextMate scope name to colour this rule's matches
+	'(' s 'as' s scope_name s ')' s
+	-> scope_name
+
+scope_name (as entity.other.attribute-name.px) =	// A dotted TextMate scope name, e.g. keyword.control.px
+	[\a_] *[\w_.\-]
 
 action =				// An action says which bits of a rule to capture
 	'->' s
@@ -70,8 +77,8 @@ repetition =
 	s
 	-> repetition: repeat_count, atom, label
 
-label =
-	':' name			// Apply a name to the previous atom
+label (as keyword.other.annotation.px) =	// Apply a name to the previous atom
+	':' name
 	-> name
 
 atom =
@@ -88,10 +95,10 @@ group =
 	-> alternates
 
 // Character properties here: \a = any letter, \w = any letter or digit
-name =
+name (as entity.name.function.px) =
 	[\a_] *[\w_]
 
-literal =				// Contents of a literal string
+literal (as string.quoted.single.px) =	// Contents of a literal string
 	*(!['] literal_char)
 
 literal_char =
@@ -104,10 +111,10 @@ literal_char =
 	   | [^\n] )			// other special escape except newline
 	| [^\\\n]			// any normal character except backslash or newline
 
-property =				// Contents of a property
+property (as constant.character.escape.px) =	// Contents of a property
 	[adhswLU]			// alpha, digit, hexadecimal, whitespace, word (alpha or digit), lower, upper
 
-class =					// Contents of a character class
+class (as constant.other.character-class.px) =	// Contents of a character class
 	?'^' ?'-' +class_part
 
 class_part =

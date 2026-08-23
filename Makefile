@@ -17,12 +17,14 @@ DEBUG	=	-O2 $(COPT)
 HDRS	=	\
 		px_pegexp.h \
 		px_railroad.h \
-		px_cpp.h
+		px_cpp.h \
+		px_textmate.h
 
 SRCS	=	\
 		px_pegexp.cpp \
 		px_railroad.cpp \
 		px_cpp.cpp \
+		px_textmate.cpp \
 		px.cpp
 
 OBJS	=	$(patsubst %,%,$(SRCS:.cpp=.o))
