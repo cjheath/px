@@ -3,7 +3,7 @@
 /*
  * TextMate grammar generator for a parser (IDE syntax highlighting)
  *
- * Copyright 2025 Clifford Heath. ALL RIGHTS RESERVED SUBJECT TO ATTACHED LICENSE.
+ * Copyright 2026 Clifford Heath. ALL RIGHTS RESERVED SUBJECT TO ATTACHED LICENSE.
  */
 #include	<strval.h>
 #include	<variant.h>

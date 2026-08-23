@@ -3,6 +3,7 @@
 *_test
 *_test.dSYM
 *.a
+_site
 build
 extra
 .vscode
