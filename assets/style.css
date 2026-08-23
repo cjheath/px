@@ -1,0 +1,165 @@
+/* Px docs - a light stylesheet, not a design system */
+
+:root {
+  --ink: #1e2328;
+  --muted: #5b6470;
+  --accent: #2a5db0;
+  --bg-code: #f4f5f7;
+  --border: #dfe3e8;
+  --max-width: 46rem;
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: light; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #fff;
+  font: 17px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 0.9rem 0;
+}
+.site-header .wrap {
+  max-width: 56rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.25rem;
+}
+.site-header .brand {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--ink);
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+.site-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1rem;
+  font-size: 0.92rem;
+}
+.site-header nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.site-header nav a:hover,
+.site-header nav a:focus {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+main { padding: 2rem 1.25rem 1rem; }
+
+h1 { font-size: 1.9rem; margin: 0 0 1.2rem; }
+h2 { font-size: 1.35rem; margin: 2rem 0 0.7rem; }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+
+p, ul, ol { margin: 0.8rem 0; }
+li { margin: 0.2rem 0; }
+
+a { color: var(--accent); }
+
+code {
+  font: 0.88em/1.4 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  background: var(--bg-code);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; border-radius: 0; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg-code); }
+
+blockquote {
+  margin: 1rem 0;
+  padding: 0.1rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+.demo {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1.2rem 0;
+  overflow-x: auto;
+}
+.demo-code {
+  background: #1e2129;
+  color: #c7cbd1;
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font: 0.88em/1.6 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  white-space: pre;
+  tab-size: 4;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 1.2rem 1.25rem 2.5rem;
+}
+
+/* Token colours for the syntax-highlighting demo, matching the actual scope names
+   the -t generator assigns (see textmate-generator.html) */
+.tok-comment    { color: #7d8797; font-style: italic; }
+.tok-string     { color: #94c47d; }
+.tok-class      { color: #e0a458; }
+.tok-escape     { color: #d97757; font-weight: 500; }
+.tok-function   { color: #74a8e0; }
+.tok-attr       { color: #c792ea; }
+.tok-annotation { color: #e0819a; }
+
+.legend {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.6rem 1rem;
+}
+.legend li {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  margin: 0;
+}
+.legend .rule { font-weight: 600; }
+.legend .scope {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+}

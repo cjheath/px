@@ -1,0 +1,6 @@
+title: Px
+description: A PEG parser generator language and compiler, and how to use it
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge

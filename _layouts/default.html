@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ page.title | escape }} &middot; Px</title>
+<meta name="description" content="{{ page.description | default: site.description | escape }}">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/rouge.css">
+{% if page.railroad %}
+<link rel="stylesheet" href="assets/railroad-diagrams.css">
+<script src="assets/railroad-diagrams.js"></script>
+{% endif %}
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">Px</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="peg-primer.html">PEG Primer</a>
+      <a href="pitfalls.html">Pitfalls &amp; Lookahead</a>
+      <a href="language.html">Px Language</a>
+      <a href="cpp-generator.html">C++ Generator</a>
+      <a href="railroad-generator.html">Railroad Diagrams</a>
+      <a href="textmate-generator.html">Syntax Highlighting</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>{{ page.title | escape }}</h1>
+  {{ content }}
+</main>
+
+<footer class="wrap">
+  <p>Px is a PEG parser generator language and compiler &mdash;
+    <a href="https://github.com/cjheath/px">source on GitHub</a>.</p>
+  <p>Copyright 2026 Clifford Heath. Licensed under the
+    <a href="https://github.com/cjheath/px/blob/main/LICENSE">Mozilla Public License 2.0</a>.</p>
+</footer>
+</body>
+</html>
