@@ -1,7 +1,7 @@
 ## Px, a PEG parser generator language
 
 Px is a grammar-description language and compiler for parsers and code generators,
-which also generates grammar documentation and (in future) IDE syntax highlighting.
+which also generates grammar documentation and IDE syntax highlighting.
 
 The grammars are recursive-descent LL(*), expressed using Parsing Expression Grammar
 patterns (but with operators in the prefix position, unlike BNF), using unlimited
