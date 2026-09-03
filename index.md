@@ -16,8 +16,12 @@ write one grammar, in Px, and Px compiles it into whichever of these you need:
 Px grammars are [PEGs](peg-primer.html) (Parsing Expression Grammars) written in a
 [BNF](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form)-like notation, but with
 repetition operators (`?` `*` `+`) and lookahead assertions (`&` `!`) moved into
-*prefix* position, ahead of what they apply to, rather than trailing it. A rule looks
-like this &mdash; the `number` rule from Px's own [JSON grammar](https://github.com/cjheath/px/blob/main/grammars/json.px):
+*prefix* position, ahead of what they apply to, rather than trailing it. This copies
+the underlying Pegexp library, which doesn't need to pre-compile the matching expressions
+in order to achieve good performance, as is the case with most regular expression
+implementations.
+
+An example of a rule is this `number` rule from Px's own [JSON grammar](https://github.com/cjheath/px/blob/main/grammars/json.px):
 
 ```
 number	= ?'-' (|'0' | [1-9] *[0-9]) ?('.' +[0-9]) ?([eE] ?[-+] +[0-9])
@@ -25,9 +29,8 @@ number	= ?'-' (|'0' | [1-9] *[0-9]) ?('.' +[0-9]) ?([eE] ?[-+] +[0-9])
 
 Read left to right: an optional `-`, then either a bare `0` or a non-zero digit
 followed by more digits, then an optional `.` followed by digits, then an optional
-exponent. No regular expression, no hand-written recursive-descent code &mdash; and
-because it's a real grammar rule (not a regex), it composes with the rest of the
-language the same way every other rule does.
+exponent. It's just a different way to write a regular expression. Or as we will
+see, a non-regular one, because a rule can call itself directly or through other rules.
 
 ## Where to start
 

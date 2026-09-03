@@ -14,8 +14,8 @@ px grammars/json.px > json_parser.cpp
 ## What comes out
 
 Each rule becomes one `Rule` table entry: its name, its body compiled into a compact
-runtime pattern language ("Pegexp" &mdash; `<name>` for a rule call, everything else
-close to what you wrote), and, if it captures anything, an array of the capture names:
+runtime pattern language ("Pegexp", but using `<name>` for a rule call, everything else
+is close to what you wrote), and, if it captures anything, an array of the capture names:
 
 ```cpp
 const char*	TOP_captures[] = { "object", "array", "string", "v", "number", 0 };
@@ -36,8 +36,9 @@ JsonParser::Rule	JsonParser::rules[] =
 int	JsonParser::num_rule = sizeof(JsonParser::rules)/sizeof(JsonParser::rules[0]);
 ```
 
-That's data, not code &mdash; [`Peg<>`][Peg] is what turns a `Rule[]` table into an
-actual parser. `s`, with no captures, passes `0` for its capture array.
+That's just data, not code &mdash; [`Peg<>`][Peg] is what turns a `Rule[]` table
+into a parser. A program can have many different parsers without any additional
+code, and could in principle even create new parsers on the fly.
 
 ## Declaring the parser class
 
@@ -69,8 +70,10 @@ that parses into a `Variant` abstract syntax tree &mdash; matched text becomes a
 `Variant::String`, and each rule's captures become entries in a `Variant::StrVarMap`,
 with repeated captures collected into a `Variant::VarArray` (that's how `object`'s
 `k, v` capture ends up as two parallel arrays &mdash; see [The Px
-Language](language.html#captures)). You can swap in your own `Context` type if you
-want a different result shape, but for most grammars this is all you need.
+Language](language.html#captures)).
+
+If you need different results or more optimised implementation, you can define your
+own `Context` type to expand the Peg<> template.
 
 ## Parsing something
 
@@ -115,13 +118,12 @@ parse) is built from exactly these two fields.
 
 ## A grammar describing a sequence of independent items
 
-Px's own bootstrap (`px.px`, parsed by `PxParser`) is a *sequence* of separate rules,
-not one single top-level structure the way a JSON document is. `px.cpp` parses it by
-calling `parser.parse(source)` **repeatedly**, each time starting from
-`match.furthermost_success` (where the previous call left off), until the whole file
-is consumed. Reach for this shape whenever your grammar describes "zero or more
-independent things," rather than trying to express the repetition inside the grammar
-itself.
+The TOP grammar for Px defined in `px.px` matches just one rule at a time,
+although a Px grammar normally requires multiple rules. `px.cpp` calls the
+parser repeatedly, progressing through the input one rule at a time.  Each
+parse starts from `match.furthermost_success` (where the previous parse reached),
+until the whole file is consumed.  This means that the entire abstract syntax
+tree doesn't need to exist at one time.
 
 <!-- Everything above lives in strpp (https://github.com/cjheath/strpp), pinned to the
      commit this page was written against so the line numbers stay accurate. -->

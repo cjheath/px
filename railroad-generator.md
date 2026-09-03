@@ -13,7 +13,7 @@ px -r px.px > px-grammar.html
 ```
 
 Whitespace-only helper rules (like Px's own `s`) clutter a diagram set without adding
-anything worth reading &mdash; `-x rulename` excludes one, and can be repeated:
+anything worth reading &mdash; each `-x rulename` excludes one rule:
 
 ```
 px -r -x s -x space -x blankline px.px > px-grammar.html

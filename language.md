@@ -5,7 +5,9 @@ description: Rules, atoms, operators, captures, and the (as scope.name) annotati
 ---
 
 A Px grammar is a sequence of rules. Each rule is a name, an `=`, a PEG expression,
-and an optional capture list, and is terminated by a blank line:
+and an optional capture list, and is terminated by a blank line. The capture list
+indicates which of the named items in the expression carry semantic content that
+should be made available to the calling program.
 
 ```
 rule_name =
@@ -13,7 +15,7 @@ rule_name =
 	-> captured, names
 ```
 
-## Rules and scope annotations {#rules-and-scope-annotations}
+## Rules and highlighting scope annotations {#rules-and-scope-annotations}
 
 Right after the name, before the `=`, a rule can optionally carry a parenthesised
 `(as scope.name)` &mdash; this doesn't change what the rule matches at all; it's
@@ -47,38 +49,43 @@ of a regex, where `x*` follows the `x`. In Px it's `*x`.
 | `?A` | zero or one of A |
 | `*A` | zero or more of A |
 | `+A` | one or more of A |
-| `\|A\|B` | A, or if that fails, B (ordered choice &mdash; see the [PEG primer](peg-primer.html)) |
-| `&A` | succeed here (consuming nothing) if A matches |
-| `!A` | succeed here (consuming nothing) if A does *not* match |
+| `\|A\|B` | either A, or B, etc (ordered choice &mdash; see the [PEG primer](peg-primer.html)) |
+| `&A` | succeed here (consuming nothing) if A would match |
+| `!A` | succeed here (consuming nothing) if A would *not* match |
 | `{n}A` | exactly n of A; `{n,name}` and other count forms reference a captured value |
 
 `&`/`!` are lookahead assertions, the main subject of [Pitfalls &
 Lookahead](pitfalls.html).
 
+Note: `{n}` is not yet implemented in the underlying Pegexp library.
+
 ## Character classes and properties
 
-`[...]` matches one character from the set inside &mdash; `^` at the start negates it,
-and `-` between two characters gives a range, exactly like a regex class. Inside a
-class or a literal string, a backslash escape can be:
+`[...]` matches one character from the defined set.
+A `-` between two characters gives a range, exactly like a regex class.
+A `^` at the start negates the whole set, succeeding on any character not in the set.
+Any single character may be any valid Unicode character.
+Inside a class or a literal string, a backslash escape can be:
 
-- a **character property**: `\a` alpha, `\d` digit, `\h` hex digit, `\s` whitespace,
-  `\w` alpha-or-digit, `\L` lowercase, `\U` uppercase &mdash; these work as a class
-  member, inside a literal, or as a standalone atom (`\d` on its own means "any
-  digit");
-- a **C-style escape**: `\n` `\t` `\r` `\b` `\f`, or `\'` `\"` `\\` for the character
-  itself;
+- a **C-style escape**: `\n` `\t` `\r` `\b` `\f`, or `\'` `\"` `\\` for those characters
+  themselves;
 - a **numeric escape**: `\177` (octal), `\xHH` or `\x{H...}` (hex), `\uHHHH` or
-  `\u{H...}` (Unicode).
+  `\u{H...}` (Unicode)
+- Except in literal strings, a **character property**: `\a` alpha, `\d` digit, `\h` hex digit, `\s` whitespace,
+  `\w` alpha-or-digit, `\L` lowercase, `\U` uppercase. These work inside a character
+  class, or as a standalone atom (`\d` on its own means "any digit"; note that the
+  underlying Unicode library recognises many kinds of digits), but not in a literal string;
 
 ## Captures {#captures}
 
 A rule followed by `-> a, b, c` captures whatever matched `a`, `b` and `c` into an
 ordered array in the parse tree, even when one of them appears more than once in the
 rule (handy for a comma-separated list). Anything not named in the list is parsed but
-discarded &mdash; only what you capture ends up in the AST.
+discarded &mdash; only what you capture is kept. Note that if multiple items of the
+same name are matched more than once, the capture is an Array of all the matches.
 
 A **label** (`:name` right after any atom, including a rule call) gives that specific
-occurrence a name to capture by, independent of what rule it calls:
+occurrence a name to capture by, independent of the rule's name:
 
 ```
 object = '{' *(|(string:k ':' TOP:v *(',' string:k ':' TOP:v)) | s) '}'
@@ -120,6 +127,9 @@ with one of those, order doesn't matter *here*. `string`'s body is exactly the
 "unbounded repetition needs a stop condition" shape from
 [pitfalls.md](pitfalls.html#3-unbounded-repetition-needs-its-own-stop-condition):
 every iteration either takes a plain character that isn't `"`, `\` or a control
-character, or an `escape`, until the closing `"` ends it. See this grammar turned into
-a real parser on the [C++ generator](cpp-generator.html) page, and into a highlighter
-on the [syntax highlighting](textmate-generator.html) page.
+character, or an `escape`, until the closing `"` ends it. The syntax for numeric
+character escapes is derived from Unicode 2 (which uses two 16-bit surrogate characters
+to encode a larger set), so it differs from Px's native grammar.
+
+See this grammar turned into a real parser on the [C++ generator](cpp-generator.html)
+page, and into a highlighter on the [syntax highlighting](textmate-generator.html) page.
