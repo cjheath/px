@@ -46,7 +46,11 @@ var PxRailroads = {
   BOM:
     ComplexDiagram(Terminal('\\u{FEFF}')),
   rule:
-    ComplexDiagram(Sequence(NonTerminal('name', {href: '#name'}), Terminal('='), NonTerminal('alternates', {href: '#alternates'}), Optional(NonTerminal('action', {href: '#action'})), NonTerminal('blankline', {href: '#blankline'}))),
+    ComplexDiagram(Sequence(NonTerminal('name', {href: '#name'}), Optional(NonTerminal('scope_annotation', {href: '#scope_annotation'})), Terminal('='), NonTerminal('alternates', {href: '#alternates'}), Optional(NonTerminal('action', {href: '#action'})), NonTerminal('blankline', {href: '#blankline'}))),
+  scope_annotation:
+    ComplexDiagram(Sequence(Terminal('('), Terminal('as'), NonTerminal('scope_name', {href: '#scope_name'}), Terminal(')'))),
+  scope_name:
+    ComplexDiagram(Sequence(Terminal('[\\a_]'), ZeroOrMore(Terminal('[\\w_.-]')))),
   action:
     ComplexDiagram(Sequence(Terminal('->'), Optional(Sequence(NonTerminal('name', {href: '#name'}), Terminal(':'))), NonTerminal('parameter', {href: '#parameter'}), ZeroOrMore(Sequence(Terminal(','), NonTerminal('parameter', {href: '#parameter'}))))),
   parameter:
@@ -101,6 +105,10 @@ var PxRailroads = {
   <dd><script>PxRailroads.BOM.addTo();</script></dd>
 <dt id='rule'>rule</dt>
   <dd><script>PxRailroads.rule.addTo();</script></dd>
+<dt id='scope_annotation'>scope_annotation</dt>
+  <dd><script>PxRailroads.scope_annotation.addTo();</script></dd>
+<dt id='scope_name'>scope_name</dt>
+  <dd><script>PxRailroads.scope_name.addTo();</script></dd>
 <dt id='action'>action</dt>
   <dd><script>PxRailroads.action.addTo();</script></dd>
 <dt id='parameter'>parameter</dt>
