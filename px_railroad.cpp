@@ -41,6 +41,7 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 		[&](const UTF8*& cp, const UTF8* ep) -> StrVal
 		{
 			ErrNum		e;
+			ErrBuf::MsgSequence	at;	// Where the last tolerated report began
 			unsigned int	i;
 			UCS4    	ch = UTF8Get(cp);       // Get UCS4 character
 			const char*	sp;
@@ -62,12 +63,19 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 			if (ch == '0')		// Octal
 			{
 				StrBody	temp_body(cp, StrStatic, 3);		// no-copy string body
+				at = ErrCheckpoint();
 				ch = StrVal(&temp_body).asInt32(&e, 8, &i);
-				if (e == 0 || e == STRERR_TRAIL_TEXT)
+				if (STRERR_TRAIL_TEXT == e)
+				{
+					ErrRollback(at);
+					e = 0;		// The fixed-width slice ran out, as it should
+				}
+				if (e == 0)
 					cp += i;
 			}
 			if (ch == 'x')		// Hex, two formats
 			{
+				at = ErrCheckpoint();
 				if (*cp != '{')
 				{
 					StrBody	temp_body(cp, StrStatic, 2);	// no-copy string body
@@ -78,11 +86,17 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 					StrBody	temp_body(cp+1, StrStatic, 8);	// no-copy string body
 					ch = StrVal(&temp_body).asInt32(&e, 16, &i);
 				}
-				if (e == 0 || e == STRERR_TRAIL_TEXT)
+				if (STRERR_TRAIL_TEXT == e)
+				{
+					ErrRollback(at);
+					e = 0;		// The fixed-width slice ran out, as it should
+				}
+				if (e == 0)
 					cp += i + (*cp == '{' ? 2 : 0);
 			}
 			else if (ch == 'u')	// Unicode, two formats
 			{
+				at = ErrCheckpoint();
 				if (*cp == '{')
 				{
 					StrBody	temp_body(cp+1, StrStatic, 8);	// no-copy string body
@@ -93,7 +107,12 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 					StrBody	temp_body(cp, StrStatic, 4);	// no-copy string body
 					ch = StrVal(&temp_body).asInt32(&e, 16, &i);
 				}
-				if (e == 0 || e == STRERR_TRAIL_TEXT)
+				if (STRERR_TRAIL_TEXT == e)
+				{
+					ErrRollback(at);
+					e = 0;		// The fixed-width slice ran out, as it should
+				}
+				if (e == 0)
 					cp += i + (*cp == '{' ? 2 : 0);
 				else
 					PX_WRITE_ERR(StrVal::format("error 0x{1:X}\n",

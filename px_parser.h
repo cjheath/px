@@ -8,6 +8,8 @@
  * Where px writes. A Strpp program has no stdio, so this is write(2) - and a
  * platform with somewhere better to write defines PX_WRITE and PX_WRITE_ERR
  * before including this, as it does for strpp's panic dump.
+ *
+ * This is a placeholder until Strpp gets Streams in place.
  */
 #if	!defined(PX_WRITE)
 #include	<unistd.h>
@@ -18,6 +20,8 @@ inline void	px_write(int fd, StrVal text)
 #define	PX_WRITE(text)		px_write(1, (text))
 #define	PX_WRITE_ERR(text)	px_write(2, (text))
 #endif
+
+#include	<errbuf.h>
 #include	<peg.h>
 #include	<peg_ast.h>
 

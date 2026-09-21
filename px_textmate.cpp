@@ -34,14 +34,21 @@ typedef	CowMap<bool>	StringSet;
 static UCS4 interpret_backslash(const UTF8*& cp)
 {
 	ErrNum		e;
+	ErrBuf::MsgSequence	at;	// Where the last tolerated report began
 	unsigned int	i;
 	UCS4		ch = UTF8Get(cp);
 
 	if (ch == '0')				// Octal
 	{
 		StrBody	temp_body(cp, StrStatic, 3);
+		at = ErrCheckpoint();
 		UCS4	v = StrVal(&temp_body).asInt32(&e, 8, &i);
-		if (e == 0 || e == STRERR_TRAIL_TEXT)
+		if (STRERR_TRAIL_TEXT == e)
+		{
+			ErrRollback(at);
+			e = 0;		// The fixed-width slice ran out, as it should
+		}
+		if (e == 0)
 		{ cp += i; return v; }
 		return ch;
 	}
@@ -50,14 +57,26 @@ static UCS4 interpret_backslash(const UTF8*& cp)
 		if (*cp == '{')
 		{
 			StrBody	temp_body(cp+1, StrStatic, 8);
+			at = ErrCheckpoint();
 			UCS4	v = StrVal(&temp_body).asInt32(&e, 16, &i);
-			if (e == 0 || e == STRERR_TRAIL_TEXT)
+			if (STRERR_TRAIL_TEXT == e)
+			{
+				ErrRollback(at);
+				e = 0;		// The fixed-width slice ran out, as it should
+			}
+			if (e == 0)
 				cp += i + 2;
 			return v;
 		}
 		StrBody	temp_body(cp, StrStatic, 2);
+		at = ErrCheckpoint();
 		UCS4	v = StrVal(&temp_body).asInt32(&e, 16, &i);
-		if (e == 0 || e == STRERR_TRAIL_TEXT)
+		if (STRERR_TRAIL_TEXT == e)
+		{
+			ErrRollback(at);
+			e = 0;		// The fixed-width slice ran out, as it should
+		}
+		if (e == 0)
 			cp += i;
 		return v;
 	}
@@ -66,14 +85,26 @@ static UCS4 interpret_backslash(const UTF8*& cp)
 		if (*cp == '{')
 		{
 			StrBody	temp_body(cp+1, StrStatic, 8);
+			at = ErrCheckpoint();
 			UCS4	v = StrVal(&temp_body).asInt32(&e, 16, &i);
-			if (e == 0 || e == STRERR_TRAIL_TEXT)
+			if (STRERR_TRAIL_TEXT == e)
+			{
+				ErrRollback(at);
+				e = 0;		// The fixed-width slice ran out, as it should
+			}
+			if (e == 0)
 				cp += i + 2;
 			return v;
 		}
 		StrBody	temp_body(cp, StrStatic, 4);
+		at = ErrCheckpoint();
 		UCS4	v = StrVal(&temp_body).asInt32(&e, 16, &i);
-		if (e == 0 || e == STRERR_TRAIL_TEXT)
+		if (STRERR_TRAIL_TEXT == e)
+		{
+			ErrRollback(at);
+			e = 0;		// The fixed-width slice ran out, as it should
+		}
+		if (e == 0)
 			cp += i;
 		return v;
 	}
