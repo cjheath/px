@@ -19,7 +19,6 @@
 #include	<variant.h>
 #include	<char_encoding.h>
 
-#include	<cstdio>
 #include	<cctype>
 #include	<cstring>
 
@@ -133,8 +132,7 @@ StrVal regex_escape_literal(StrVal literal)
 			}
 			if (ch < ' ' || ch == 0x7F)
 			{
-				snprintf(ubuf, sizeof(ubuf), "\\x%02X", (unsigned)ch);
-				return ubuf;
+				return StrVal::format("\\x{1:X02}", VariantArray() << ch);
 			}
 			if (ch < 0x80 && strchr(pcre_special, (char)ch))
 				return StrVal("\\")+ch;
@@ -168,10 +166,7 @@ StrVal regex_translate_class(StrVal body)
 			if (ch != '\\')
 			{
 				if (ch < ' ' || ch == 0x7F)
-				{
-					snprintf(ubuf, sizeof(ubuf), "\\x%02X", (unsigned)ch);
-					return ubuf;
-				}
+					return StrVal::format("\\x{1:X02}", VariantArray() << ch);
 				return ch;
 			}
 
@@ -198,10 +193,7 @@ StrVal regex_translate_class(StrVal body)
 			case '\b': return "\\b";	// Inside a class, PCRE's \b IS backspace
 			}
 			if (ch2 < ' ' || ch2 == 0x7F)
-			{
-				snprintf(ubuf, sizeof(ubuf), "\\x%02X", (unsigned)ch2);
-				return ubuf;
-			}
+				return StrVal::format("\\x{1:X02}", VariantArray() << ch2);
 			if (ch2 < 0x80 && strchr(pcre_class_special, (char)ch2))
 				return StrVal("\\")+ch2;
 			return ch2;
@@ -818,9 +810,9 @@ static Variant build_pattern_for_rule(
 		Variant	fallback = flat_fallback();
 		if (fallback.type() != Variant::None)
 			return fallback;
-		fprintf(stderr,
-			"textmate: rule %s has multiple top-level alternatives; can't auto-infer begin/end, skipping\n",
-			name.asUTF8());
+		PX_WRITE_ERR(StrVal::format(
+			"textmate: rule {1} has multiple top-level alternatives; can't auto-infer begin/end, skipping\n",
+			VariantArray() << name));
 		return Variant();
 	}
 	VariantArray	top_reps = seq_list.as_variant_map()["repetition"].as_variant_array();
@@ -845,10 +837,10 @@ static Variant build_pattern_for_rule(
 		Variant	fallback = flat_fallback();
 		if (fallback.type() != Variant::None)
 			return fallback;
-		fprintf(stderr,
-			"textmate: rule %s needs a fixed prefix before its repeated content; "
+		PX_WRITE_ERR(StrVal::format(
+			"textmate: rule {1} needs a fixed prefix before its repeated content; "
 			"can't auto-infer begin/end, skipping\n",
-			name.asUTF8());
+			VariantArray() << name));
 		return Variant();
 	}
 
@@ -874,9 +866,9 @@ static Variant build_pattern_for_rule(
 			Variant	fallback = flat_fallback();
 			if (fallback.type() != Variant::None)
 				return fallback;
-			fprintf(stderr,
-				"textmate: rule %s: can't auto-infer an end delimiter, skipping\n",
-				name.asUTF8());
+			PX_WRITE_ERR(StrVal::format(
+				"textmate: rule {1}: can't auto-infer an end delimiter, skipping\n",
+				VariantArray() << name));
 			return Variant();
 		}
 		end_regex = flatten_sequence(end_reps, rule_by_name, visiting);
@@ -963,5 +955,5 @@ void emit_textmate(const char* base_name, VariantArray rules)
 	grammar.insert("patterns", Variant(root_patterns));
 	grammar.insert("repository", Variant(repository));
 
-	printf("%s\n", Variant(grammar).as_json(0).asUTF8());
+	PX_WRITE(StrVal(Variant(grammar).as_json(0))+"\n");
 }

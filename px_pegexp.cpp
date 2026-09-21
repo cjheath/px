@@ -33,7 +33,6 @@ StrVal generate_literal(StrVal literal, bool leave_specials = false)
 	static	auto	c_esc_chars = "ntrbf";		// Match the character positions
 	static	auto	hex = "0123456789ABCDEF";
 
-	// printf("generate_literal from %s", literal.asUTF8());
 	// Escape special characters:
 	literal.transform(
 		[&](const UTF8*& cp, const UTF8* ep) -> StrVal
@@ -60,22 +59,20 @@ StrVal generate_literal(StrVal literal, bool leave_specials = false)
 				if (UCS4IsLatin1(ch))
 					return StrVal("\\x") + (UCS4)hex[(ch>>4)&0xF] + (UCS4)hex[ch&0xF];
 
-				static	char	ubuf[20];
-				auto	cp = ubuf;
-				*cp++ = '\\';
-				*cp++ = 'u';
 				if (UCS4IsUTF16(ch))
 				{		// 4-byte Unicode escape without braces
+					char	ubuf[8];		// "\u" and four hex digits
+					auto	cp = ubuf;
+					*cp++ = '\\';
+					*cp++ = 'u';
 					*cp++ = hex[(ch>>12)&0xF];
 					*cp++ = hex[(ch>>8)&0xF];
 					*cp++ = hex[(ch>>4)&0xF];
 					*cp++ = hex[ch&0xF];
-					*cp = '\0';
-					return ubuf;
+					return StrVal(ubuf, 6);
 				}
-				// Unicode with braces. Sorry for printf, but StrVal::format doesn't exist yet
-				snprintf(cp, sizeof(ubuf)-(cp-ubuf), "%lX}", (long)(ch & 0xFFFFFFFF));
-				return ubuf;
+				// Beyond UTF-16: the braced escape, as CSS and TextMate write it
+				return StrVal::format("\\u{{{1:X}}}", VariantArray() << (ch & 0xFFFFFFFF));
 			}
 
 			if (!leave_specials				// Don't escape specials inside a char class
@@ -87,7 +84,6 @@ StrVal generate_literal(StrVal literal, bool leave_specials = false)
 			return ch;
 		}
 	);
-	// printf(" to %s\n", literal.asUTF8());
 
 	return literal;
 }

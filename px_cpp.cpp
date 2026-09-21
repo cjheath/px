@@ -7,7 +7,6 @@
 #include	<variant.h>
 #include	<char_encoding.h>
 
-#include	<cstdio>
 #include	<cctype>
 #include	<sys/stat.h>
 #include	<unistd.h>
@@ -85,7 +84,6 @@ StrVal transform_literal_to_cpp(StrVal str)
 			return ubuf;
 		}
 	);
-	// printf("Cooked pegular-expression: '%s'\n", str.asUTF8());
 	return str;
 }
 
@@ -95,7 +93,6 @@ void emit_rule_cpp(
 	StrVal&		rules
 )
 {
-	// printf("Parse Tree:\n%s\n", _rule.as_json(-2).asUTF8());
 
 	StrVariantMap	rule = _rule.as_variant_map()["rule"].as_variant_map();
 	Variant		vr = rule["name"];
@@ -126,7 +123,6 @@ void emit_rule_cpp(
 
 	// Generate the pegular expression for this rule:
 	StrVal		re = generate_pegexp(va);
-	// printf("Pegexp:\t %s\n", re.asUTF8());
 	StrVal		re_cpp = transform_literal_to_cpp(re);
 
 	rules += StrVal("\t{ \"")
@@ -138,6 +134,10 @@ void emit_rule_cpp(
 		+ "\n\t}";
 }
 
+/*
+ * What px emits unless another emitter is asked for: the C++ rules a parser
+ * compiles from. See the default in px.cpp's main.
+ */
 void emit_cpp(const char* base_name, VariantArray rules)
 {
 	StrVal	capture_arrays;
@@ -153,34 +153,22 @@ void emit_cpp(const char* base_name, VariantArray rules)
 		emit_rule_cpp(rules[i], capture_arrays, rules_text);
 	}
 
-	const UTF8*	parser_name_u = parser_name.asUTF8();
-	const UTF8*	file_base_name_u = file_base_name.asUTF8();
-
-	printf(
+	// The two braces of the C++ are doubled, since they're not parameter substitutions.
+	PX_WRITE(StrVal::format(
 		"/*\n"
-		" * Rules for a %sParser\n"
+		" * Rules for a {1}Parser\n"
 		" *\n"
-		" * You must declare this type in %s.h by expanding the Peg<> template\n"
+		" * You must declare this type in {2}.h by expanding the Peg<> template\n"
 		" */\n"
-		"#include\t<%s.h>\n"
+		"#include\t<{2}.h>\n"
 		"\n"
-		"%s\n"				// capture_arrays
-		"%sParser::Rule\t%sParser::rules[] =\n{"
-		"%s\n"				// rules_text
-		"};\n"
+		"{3}\n"				// capture_arrays
+		"{1}Parser::Rule\t{1}Parser::rules[] =\n{{"
+		"{4}\n"				// rules_text
+		"}};\n"
 		"\n"
-		"int\t%sParser::num_rule = sizeof(%sParser::rules)/sizeof(%sParser::rules[0]);\n",
-
-		parser_name_u,			// Rules for a XXX
-		file_base_name_u,		// You must declare...
-		file_base_name_u,		// #include...
-		capture_arrays.asUTF8(),
-		parser_name_u,			// XxParser::Rule XxParser::rules[] = {
-		parser_name_u,
-		rules_text.asUTF8(),
-		parser_name_u,			// XxParser::num_rule
-		parser_name_u,			// XxParser::rules
-		parser_name_u			// XxParser::rules[0]
-	);
+		"int\t{1}Parser::num_rule = sizeof({1}Parser::rules)/sizeof({1}Parser::rules[0]);\n",
+		VariantArray() << parser_name << file_base_name
+			<< capture_arrays << rules_text));
 }
 

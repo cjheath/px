@@ -7,7 +7,6 @@
 #include	<variant.h>
 #include	<char_encoding.h>
 
-#include	<cstdio>
 #include	<cctype>
 #include	<sys/stat.h>
 #include	<unistd.h>
@@ -24,7 +23,14 @@ typedef	CowMap<bool>	StringSet;
 
 void usage()
 {
-	fprintf(stderr, "Usage: px peg.px\n");
+	PX_WRITE_ERR(StrVal(
+		"Usage: px [-c|-j|-t|-r [-x rule ...]] peg.px\n"
+		"\t-c\tEmit the C++ rules for a parser (default case)\n"
+		"\t-t\tEmit a TextMate grammar\n"
+		"\t-r\tEmit railroad diagrams as HTML\n"
+		"\t-x rule\tWith -r, a rule to omit from the diagrams\n"
+		"\t-j\tEmit the parsed rules as JSON\n"
+		));
 	exit(1);
 }
 
@@ -130,7 +136,6 @@ bool check_rules(VariantArray rules)
 		accumulate_called_rules(called_rules, va);
 	}
 
-	// printf("Rules: %zu defined, %zu called\n", defined_rules.size(), called_rules.size());
 
 	// Ensure that all called rules exist:
 	bool ok = true;
@@ -139,7 +144,8 @@ bool check_rules(VariantArray rules)
 		if (!defined_rules[i->first])
 		{
 			ok = false;
-			fprintf(stderr, "Rule %s is called but not defined\n", StrVal(i->first).asUTF8());
+			PX_WRITE_ERR(StrVal::format("Rule {1} is called but not defined\n",
+					VariantArray() << StrVal(i->first)));
 		}
 	}
 
@@ -147,7 +153,8 @@ bool check_rules(VariantArray rules)
 	for (auto i = defined_rules.begin(); i != defined_rules.end(); i++)
 	{
 		if (i->first != "TOP" && !called_rules[i->first])
-			fprintf(stderr, "Rule %s is defined but not called\n", StrVal(i->first).asUTF8());
+			PX_WRITE_ERR(StrVal::format("Rule {1} is defined but not called\n",
+					VariantArray() << StrVal(i->first)));
 	}
 
 	return ok;
@@ -181,28 +188,27 @@ parse_and_emit(const char* filename, VariantArray& rules, Emitter emit)
 
 		if (match.is_failure())
 		{
-			printf("Parse failed at line %lld column %lld (byte %lld of %d) after %d rules. Possible next %d tokens were:\n",
-				source.current_line()+match.furthermost_success.current_line()-1,
-				source.current_column()+match.furthermost_success.current_column()-1,
-				source.current_byte()+match.furthermost_success.current_byte(),
-				(int)file_size,
-				rules_parsed,
-				match.failures.length()
-			);
+			PX_WRITE(StrVal::format(
+				"Parse failed at line {1} column {2} (byte {3} of {4}) after {5} rules. Possible next {6} tokens were:\n",
+				VariantArray()
+					<< (source.current_line()+match.furthermost_success.current_line()-1)
+					<< (source.current_column()+match.furthermost_success.current_column()-1)
+					<< (source.current_byte()+match.furthermost_success.current_byte())
+					<< file_size
+					<< rules_parsed
+					<< match.failures.length()));
 
 			for (int i = 0; i < match.failures.length(); i++)
 			{
 				PegFailure	f = match.failures[i];
-				printf("\t%.*s\n", f.atom_len, f.atom);
-				printf("\t... from %s\n", StringArray(f.path).join("->").asUTF8());
+				PX_WRITE(StrVal("\t")+StrVal(f.atom, f.atom_len)+"\n");
+				PX_WRITE(StrVal("\t... from ")+StringArray(f.path).join("->")+"\n");
 			}
 			break;
 		}
 
 		bytes_parsed = match.furthermost_success.peek() - text;
 
-		// printf("===== Rule %d:\n", rules_parsed+1);
-		// printf("Parse Tree:\n%s\n", match.var.as_json(0).asUTF8());
 
 		rules.append(match.var);
 
@@ -211,7 +217,6 @@ parse_and_emit(const char* filename, VariantArray& rules, Emitter emit)
 		rules_parsed++;
 	} while (bytes_parsed < file_size);
 
-	// printf("Parsed %d bytes of %d\n", bytes_parsed, (int)file_size);
 
 	delete text;
 
@@ -233,7 +238,7 @@ parse_and_emit(const char* filename, VariantArray& rules, Emitter emit)
 
 void emit_json(const char* base_name, VariantArray rules)
 {
-	printf("%s\n", Variant(rules).as_json(0).asUTF8());
+	PX_WRITE(StrVal(Variant(rules).as_json(0))+"\n");
 }
 
 int
@@ -247,7 +252,12 @@ main(int argc, const char** argv)
 
 	if (argc > 1)
 	{
-		if (0 == strcmp("-r", argv[0]))
+		if (0 == strcmp("-c", argv[0]))
+		{
+			argc--, argv++;
+			emit = emit_cpp;
+		}
+		else if (0 == strcmp("-r", argv[0]))
 		{
 			argc--, argv++;
 			while (argc > 2 && 0 == strcmp("-x", argv[0]))
@@ -267,6 +277,8 @@ main(int argc, const char** argv)
 			argc--, argv++;
 			emit = emit_textmate;
 		}
+		else if (argv[0][0] == '-')
+			usage();		// An option we do not have, rather than a file
 	}
 
 	/*

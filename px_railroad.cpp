@@ -7,7 +7,6 @@
 #include	<variant.h>
 #include	<char_encoding.h>
 
-#include	<cstdio>
 #include	<cctype>
 #include	<sys/stat.h>
 #include	<unistd.h>
@@ -36,7 +35,6 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 	static	auto	c_esc_chars = "ntrbf";		// Match the character positions
 	static	auto	hex = "0123456789ABCDEF";
 
-	// fprintf(stderr, "generate_railroad_literal (as_char_class %s) from `%s`", as_char_class ? "true" : "false", literal.asUTF8());
 
 	// Unescape special characters to what we need to match:
 	literal.transform(
@@ -98,7 +96,8 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 				if (e == 0 || e == STRERR_TRAIL_TEXT)
 					cp += i + (*cp == '{' ? 2 : 0);
 				else
-					fprintf(stderr, "error 0x%X\n", (int32_t)e);
+					PX_WRITE_ERR(StrVal::format("error 0x{1:X}\n",
+							VariantArray() << (int32_t)e));
 			}
 
 			// Check for c-style escape:
@@ -115,18 +114,13 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 			if (ch >= 0x80)
 #endif
 			{
-				static	char	buf[16];
-
-				snprintf(buf, sizeof(buf), "\\u{%X}", ch);
-				static StrBody	temp_body(buf, StrStatic, strlen(buf));	// zero-touch string body
-				return StrVal(&temp_body);
+				return StrVal::format("\\u{{{1:X}}}", VariantArray() << ch);
 			}
 
 			return ch;
 		}
 	);
 
-	// fprintf(stderr, " via `%s`", literal.asUTF8());
 
 	// Now escape the character so it's valid for Javascript:
 	literal.transform(
@@ -168,7 +162,6 @@ StrVal generate_railroad_literal(StrVal literal, bool as_char_class = false)
 			literal = StrVal("[")+literal+"]";
 	}
 
-//	fprintf(stderr, " to `%s`\n", literal.asUTF8());
 	return literal;
 }
 
@@ -380,55 +373,49 @@ void emit_railroad(const char* base_name, VariantArray rules)
 	railroad_script += "\n};\n";
 	railroad_calls += "</dl>\n";
 
-	printf(
+	// Every brace of the CSS must doubled, since it's not a format parameter.
+	PX_WRITE(StrVal::format(
 		"<html xmlns='http://www.w3.org/1999/xhtml'>\n"
 		"<head>\n"
 		"<meta charset='UTF-8'>\n"
-		"<title>%s Grammar</title>\n"
+		"<title>{1} Grammar</title>\n"
 		"<link rel='stylesheet' href='../scripts/railroad-diagrams.css'>\n"
 		"<link rel='stylesheet' href='local.css' media='screen' type='text/css' />\n"
 		"<style>\n"
-		"body svg.railroad-diagram {\n"
-		"	background-color: hsl(30,20%%, 95%%);\n"
-		"}\n"
-		"h2 {\n"
+		"body svg.railroad-diagram {{\n"
+		"	background-color: hsl(30,20%, 95%);\n"
+		"}}\n"
+		"h2 {{\n"
 		"	font-family: sans-serif;\n"
 		"	font-size: 1em;\n"
-		"}\n"
+		"}}\n"
 		"svg.railroad-diagram path,\n"
 		"svg.railroad-diagram rect\n"
-		"{\n"
+		"{{\n"
 		"	stroke-width: 2px;\n"
-		"}\n"
-		".railroad-diagram .terminal text {\n"
+		"}}\n"
+		".railroad-diagram .terminal text {{\n"
 		"	fill: #44F;\n"
-		"}\n"
-		"div svg.railroad-diagram {\n"
-		"	width: 80%%;  // Scale to the width of the parent\n"
-		"	height: 100%%;  // Preserve the ratio\n"
-		"}\n"
-		"dt {\n"
+		"}}\n"
+		"div svg.railroad-diagram {{\n"
+		"	width: 80%;  // Scale to the width of the parent\n"
+		"	height: 100%;  // Preserve the ratio\n"
+		"}}\n"
+		"dt {{\n"
 		"	font-weight: bold;\n"
 		"	padding-bottom: 5px;\n"
-		"}\n"
-		"dd {\n"
+		"}}\n"
+		"dd {{\n"
 		"	padding-bottom: 10px;\n"
-		"}\n"
+		"}}\n"
 		"</style>\n"
 
 		"<script src='../scripts/railroad-diagrams.js'></script>\n"
 		"<script>\n"
-		"%s"
-		"</script>\n"
-		"</head>\n"
-		"\n"
-		"<body>\n"
-		"%s"
-		"\n"
-		"</body>\n"
-		"</html>\n",
-		parser_name_u,			// "Xxx Grammar"
-		railroad_script.asUTF8(),
-		railroad_calls.asUTF8()
-	);
+		"{2}"
+		"</script>\n</head>\n\n<body>\n"
+		"{3}"
+		"\n</body>\n</html>\n",
+		VariantArray() << parser_name << railroad_script << railroad_calls));
+
 }
